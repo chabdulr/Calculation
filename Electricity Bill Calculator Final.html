@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Bill Calculator</title>
+    <style>
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #e5e5e5;
+            --gray-300: #d4d4d4;
+            --gray-400: #a3a3a3;
+            --gray-500: #737373;
+            --gray-600: #525252;
+            --gray-700: #404040;
+            --gray-800: #262626;
+            --gray-900: #171717;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.12), 0 16px 32px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.12), 0 16px 32px rgba(0, 0, 0, 0.14), 0 32px 64px rgba(0, 0, 0, 0.1);
+            --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-inner-sm: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--gray-100);
+            color: var(--black);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 780px;
+            padding: 20px 16px 48px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                padding: 32px 24px 64px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 860px;
+                padding: 40px 32px 72px;
+            }
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 8px;
+        }
+
+        .app-header h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            color: var(--black);
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 640px) {
+            .app-header h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        .app-header .subtitle {
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 24px 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--gray-200);
+            transition: box-shadow var(--transition), border-color var(--transition);
+        }
+
+        @media (min-width: 640px) {
+            .card {
+                padding: 28px 28px;
+                border-radius: var(--radius-xl);
+                box-shadow: var(--shadow-lg);
+            }
+        }
+
+        .card:hover {
+            border-color: var(--gray-300);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 18px;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+            margin-left: 4px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 18px;
+            }
+            .form-grid .full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            color: var(--gray-700);
+            letter-spacing: 0.04em;
+        }
+
+        .form-group input,
+        .form-group select {
+            font-family: var(--font-stack);
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 12px 14px;
+            border: 1.5px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            background: var(--white);
+            color: var(--black);
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            box-shadow: var(--shadow-inner-sm);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--black);
+            box-shadow: var(--shadow-inner), 0 0 0 2px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group input::placeholder {
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        .form-group input[type="date"] {
+            cursor: pointer;
+        }
+
+        .form-group .hint {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 400;
+        }
+
+        .people-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .person-card {
+            background: var(--gray-50);
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 16px 16px 14px;
+            position: relative;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .person-card:hover {
+            border-color: var(--gray-400);
+            box-shadow: var(--shadow-md);
+        }
+
+        .person-card .person-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .person-card .person-number {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .person-card .btn-remove {
+            background: none;
+            border: 1.5px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+            line-height: 1;
+            padding: 0;
+        }
+
+        .person-card .btn-remove:hover {
+            border-color: var(--black);
+            color: var(--black);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .person-card .btn-remove:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-inner-sm);
+        }
+
+        .person-card .person-fields {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 640px) {
+            .person-card .person-fields {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .person-card .person-fields .form-group {
+            gap: 3px;
+        }
+
+        .person-card .person-fields .form-group label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+        }
+
+        .person-card .person-fields .form-group input {
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            border-radius: var(--radius-sm);
+            background: var(--white);
+        }
+
+        .btn {
+            font-family: var(--font-stack);
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 13px 22px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: var(--black);
+            color: var(--white);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            font-size: 1.05rem;
+            padding: 16px 28px;
+            border-radius: var(--radius-lg);
+            letter-spacing: 0.06em;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--black);
+            border: 1.5px solid var(--gray-300);
+            box-shadow: var(--shadow-sm);
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--black);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            box-shadow: var(--shadow-inner-sm);
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background: var(--white);
+            color: var(--black);
+            border: 1.5px solid var(--gray-300);
+            box-shadow: var(--shadow-sm);
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            padding: 11px 18px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            text-transform: none;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--black);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline:active {
+            box-shadow: var(--shadow-inner-sm);
+        }
+
+        .btn-add-person {
+            background: var(--white);
+            color: var(--black);
+            border: 1.5px dashed var(--gray-400);
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.02em;
+            width: 100%;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-add-person:hover {
+            border-color: var(--black);
+            border-style: solid;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .btn-add-person:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-inner-sm);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        @media (min-width: 640px) {
+            .btn-group .btn {
+                flex: 0 1 auto;
+            }
+        }
+
+        .error-container {
+            background: var(--white);
+            border: 2px solid var(--black);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin: 16px 0 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .error-container .error-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: var(--black);
+        }
+
+        .error-container .error-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .error-container .error-list li {
+            font-size: 0.88rem;
+            color: var(--gray-800);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .error-container .error-list li::before {
+            content: '!';
+            font-weight: 700;
+            font-size: 0.8rem;
+            min-width: 18px;
+            height: 18px;
+            background: var(--black);
+            color: var(--white);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-section {
+            animation: fadeInUp 0.35s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--gray-200);
+            padding: 24px 20px;
+            margin-bottom: 18px;
+        }
+
+        @media (min-width: 640px) {
+            .result-card {
+                padding: 32px 32px;
+            }
+        }
+
+        .result-card .result-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 20px;
+            color: var(--black);
+            text-align: center;
+        }
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .result-summary {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 18px;
+            }
+        }
+
+        .summary-item {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .summary-item .summary-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+
+        .summary-item .summary-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: -0.01em;
+        }
+
+        .summary-item .summary-value.highlight {
+            font-size: 1.3rem;
+        }
+
+        .people-results {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+
+        .people-results thead th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            border-bottom: 2px solid var(--gray-300);
+            background: var(--gray-50);
+        }
+
+        .people-results tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 500;
+            color: var(--black);
+            vertical-align: top;
+        }
+
+        .people-results tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .people-results .person-name {
+            font-weight: 600;
+        }
+
+        .people-results .amount {
+            font-weight: 700;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 639px) {
+            .people-results {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .people-results thead {
+                display: none;
+            }
+            .people-results tbody {
+                display: block;
+            }
+            .people-results tbody tr {
+                display: block;
+                border: 1px solid var(--gray-200);
+                border-radius: var(--radius-md);
+                margin-bottom: 10px;
+                padding: 12px;
+                background: var(--gray-50);
+            }
+            .people-results tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 0;
+                border-bottom: none;
+                font-size: 0.82rem;
+            }
+            .people-results tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--gray-500);
+                margin-right: 12px;
+            }
+            .people-results tbody td.amount {
+                justify-content: space-between;
+            }
+            .people-results .person-name {
+                font-size: 0.95rem;
+            }
+        }
+
+        .result-total {
+            background: var(--black);
+            color: var(--white);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 18px;
+        }
+
+        .result-total .total-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--gray-300);
+            margin-bottom: 4px;
+        }
+
+        .result-total .total-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--white);
+        }
+
+        .result-meta {
+            font-size: 0.82rem;
+            color: var(--gray-500);
+            text-align: center;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            justify-content: center;
+        }
+
+        .details-section {
+            border-top: 2px solid var(--gray-200);
+            padding-top: 18px;
+            margin-top: 8px;
+        }
+
+        .details-section .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 640px) {
+            .details-section .details-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .details-section .detail-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .details-section .detail-row .detail-label {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .details-section .detail-row .detail-value {
+            font-weight: 600;
+            color: var(--black);
+            text-align: right;
+            word-break: break-word;
+            max-width: 60%;
+        }
+
+        .details-section .detail-row .detail-value.full-precision {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--gray-600);
+            word-break: break-all;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--black);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-xl);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media print {
+            body {
+                background: var(--white);
+                padding: 0;
+                margin: 0;
+                font-size: 12px;
+                color: var(--black);
+            }
+
+            .app-container {
+                max-width: 100%;
+                padding: 20px;
+                margin: 0;
+            }
+
+            .app-header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .app-header .subtitle {
+                display: none;
+            }
+
+            .card,
+            .result-card {
+                box-shadow: none;
+                border: 1px solid var(--gray-300);
+                border-radius: 4px;
+                padding: 16px 20px;
+                margin-bottom: 14px;
+            }
+
+            .card:hover {
+                box-shadow: none;
+                border-color: var(--gray-300);
+            }
+
+            .form-grid {
+                display: none !important;
+            }
+
+            .people-container {
+                display: none !important;
+            }
+
+            .btn,
+            .btn-group,
+            .btn-add-person,
+            .btn-primary,
+            .btn-secondary,
+            .btn-outline,
+            .btn-remove,
+            .error-container,
+            .toast {
+                display: none !important;
+            }
+
+            .result-section {
+                display: block !important;
+            }
+
+            .result-card {
+                border: none;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .result-title {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+
+            .result-summary {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .summary-item {
+                background: var(--gray-50);
+                border: 1px solid var(--gray-300);
+                padding: 8px 10px;
+                box-shadow: none;
+            }
+
+            .summary-item .summary-value {
+                font-size: 13px;
+            }
+
+            .people-results {
+                font-size: 11px;
+            }
+
+            .people-results thead th {
+                padding: 6px 8px;
+                font-size: 9px;
+                border-bottom: 1px solid var(--black);
+            }
+
+            .people-results tbody td {
+                padding: 6px 8px;
+                border-bottom: 1px solid var(--gray-200);
+                font-size: 11px;
+            }
+
+            .result-total {
+                background: var(--white);
+                color: var(--black);
+                border: 2px solid var(--black);
+                border-radius: 4px;
+                padding: 12px 16px;
+                box-shadow: none;
+                margin-bottom: 12px;
+            }
+
+            .result-total .total-label {
+                color: var(--gray-600);
+                font-size: 10px;
+            }
+
+            .result-total .total-value {
+                color: var(--black);
+                font-size: 20px;
+            }
+
+            .result-meta {
+                font-size: 10px;
+                color: var(--gray-600);
+            }
+
+            .details-section {
+                display: block !important;
+                border-top: 1px solid var(--gray-300);
+                padding-top: 12px;
+                margin-top: 8px;
+                font-size: 10px;
+            }
+
+            .details-section .details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+
+            .details-section .detail-row {
+                padding: 3px 0;
+                font-size: 10px;
+            }
+
+            .details-section .detail-row .detail-value.full-precision {
+                font-size: 9px;
+                word-break: break-all;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .screen-only {
+                display: none !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        @media screen {
+            .print-only {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <h1>Electricity Bill Calculator</h1>
+            <p class="subtitle">Split electricity bills accurately among multiple people with submeter readings</p>
+        </header>
+
+        <!-- INPUT CARD -->
+        <section class="card" id="inputCard">
+            <h2 class="card-title">Bill Information</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="billingMonth">Billing Month</label>
+                    <input type="text" id="billingMonth" placeholder="e.g., August-2026" autocomplete="off" aria-label="Billing Month">
+                    <span class="hint">Enter month and year</span>
+                </div>
+                <div class="form-group">
+                    <label for="calcDate">Calculation Date</label>
+                    <input type="date" id="calcDate" aria-label="Calculation Date">
+                    <span class="hint">Defaults to today</span>
+                </div>
+                <div class="form-group">
+                    <label for="mainMeterUnits">Main Meter Units</label>
+                    <input type="number" id="mainMeterUnits" step="any" min="0.1" placeholder="e.g., 232.0" autocomplete="off" aria-label="Main Meter Units">
+                </div>
+                <div class="form-group">
+                    <label for="totalBill">Total Electricity Bill (PKR)</label>
+                    <input type="number" id="totalBill" step="0.01" min="0" placeholder="e.g., 10276.50" autocomplete="off" aria-label="Total Electricity Bill">
+                </div>
+            </div>
+        </section>
+
+        <!-- PEOPLE CARD -->
+        <section class="card" id="peopleCard">
+            <h2 class="card-title">People / Submeters</h2>
+            <div class="people-container" id="peopleContainer">
+                <!-- Person cards added dynamically -->
+            </div>
+            <button class="btn-add-person" id="addPersonBtn" type="button">
+                <span style="font-size:1.2rem;font-weight:700;">+</span> Add Person
+            </button>
+        </section>
+
+        <!-- CALCULATE BUTTON -->
+        <button class="btn btn-primary" id="calculateBtn" type="button">Calculate Bill</button>
+
+        <!-- ERROR CONTAINER -->
+        <div class="error-container hidden" id="errorContainer">
+            <div class="error-title">Please fix the following:</div>
+            <ul class="error-list" id="errorList"></ul>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <section class="result-section hidden" id="resultSection">
+            <div class="result-card">
+                <div class="result-title" id="resultTitle">Electricity Bill Summary</div>
+
+                <div class="result-meta" id="resultMeta"></div>
+
+                <div class="result-summary" id="resultSummary">
+                    <!-- Filled dynamically -->
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="people-results" id="peopleResultsTable">
+                        <thead>
+                            <tr>
+                                <th>Person</th>
+                                <th>Prev Reading</th>
+                                <th>Curr Reading</th>
+                                <th>Actual Units</th>
+                                <th>Adjustment</th>
+                                <th>Final Units</th>
+                                <th style="text-align:right;">Bill Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peopleResultsBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="result-total">
+                    <div class="total-label">Final Total Bill</div>
+                    <div class="total-value" id="finalTotalDisplay">0.00 PKR</div>
+                </div>
+
+                <div class="btn-group screen-only" style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <button class="btn btn-outline" id="detailsBtn" type="button" style="flex:1;min-width:130px;">View Calculation Details</button>
+                    <button class="btn btn-outline" id="copyBtn" type="button" style="flex:1;min-width:110px;">Copy Result</button>
+                    <button class="btn btn-outline" id="printBtn" type="button" style="flex:1;min-width:90px;">Print</button>
+                </div>
+
+                <!-- DETAILS SECTION -->
+                <div class="details-section hidden" id="detailsSection">
+                    <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:12px;letter-spacing:0.02em;">Calculation Details</h3>
+                    <div class="details-grid" id="detailsGrid">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============ DOM REFERENCES ============
+            const billingMonthInput = document.getElementById('billingMonth');
+            const calcDateInput = document.getElementById('calcDate');
+            const mainMeterUnitsInput = document.getElementById('mainMeterUnits');
+            const totalBillInput = document.getElementById('totalBill');
+            const peopleContainer = document.getElementById('peopleContainer');
+            const addPersonBtn = document.getElementById('addPersonBtn');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const errorContainer = document.getElementById('errorContainer');
+            const errorList = document.getElementById('errorList');
+            const resultSection = document.getElementById('resultSection');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMeta = document.getElementById('resultMeta');
+            const resultSummary = document.getElementById('resultSummary');
+            const peopleResultsBody = document.getElementById('peopleResultsBody');
+            const finalTotalDisplay = document.getElementById('finalTotalDisplay');
+            const detailsBtn = document.getElementById('detailsBtn');
+            const detailsSection = document.getElementById('detailsSection');
+            const detailsGrid = document.getElementById('detailsGrid');
+            const copyBtn = document.getElementById('copyBtn');
+            const printBtn = document.getElementById('printBtn');
+            const toast = document.getElementById('toast');
+
+            let personCounter = 0;
+            let finalResultObject = null;
+            let toastTimeout = null;
+
+            // ============ DATE HELPERS ============
+            function getTodayDateString() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            function formatDisplayDate(dateStr) {
+                if (!dateStr) return '-';
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return dateStr;
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                if (isNaN(year) || isNaN(month) || isNaN(day)) return dateStr;
+                const date = new Date(year, month, day);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+            }
+
+            function getCurrentTimeString() {
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                if (hours === 0) hours = 12;
+                return `${hours}:${minutes} ${ampm}`;
+            }
+
+            function getCurrentDateTimeString() {
+                const now = new Date();
+                return formatDisplayDate(now.toISOString().split('T')[0]) + ' ' + getCurrentTimeString();
+            }
+
+            // ============ NUMBER FORMATTING ============
+            function formatCurrency(value) {
+                return Number(value).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function formatUnits(value) {
+                const num = Number(value);
+                if (isNaN(num)) return '0.0';
+                return num.toFixed(1);
+            }
+
+            function formatFullPrecision(value) {
+                // Return a string representation with full precision (no rounding)
+                if (value === 0) return '0';
+                return value.toString();
+            }
+
+            // ============ TOAST ============
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('visible');
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('visible');
+                }, 2200);
+            }
+
+            // ============ PERSON MANAGEMENT ============
+            function addPersonCard(name, prevReading, currReading) {
+                personCounter++;
+                const id = personCounter;
+                const card = document.createElement('div');
+                card.className = 'person-card';
+                card.id = `person-card-${id}`;
+                card.innerHTML = `
+                    <div class="person-header">
+                        <span class="person-number">Person ${id}</span>
+                        <button class="btn-remove" type="button" aria-label="Remove Person ${id}" title="Remove Person" data-person-id="${id}">&times;</button>
+                    </div>
+                    <div class="person-fields">
+                        <div class="form-group">
+                            <label for="person-name-${id}">Name</label>
+                            <input type="text" id="person-name-${id}" class="person-name-input" placeholder="Person name" value="${name || ''}" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="person-prev-${id}">Previous Reading</label>
+                            <input type="number" id="person-prev-${id}" class="person-prev-input" step="any" min="0" placeholder="0.0" value="${prevReading || ''}" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="person-curr-${id}">Current Reading</label>
+                            <input type="number" id="person-curr-${id}" class="person-curr-input" step="any" min="0" placeholder="0.0" value="${currReading || ''}" autocomplete="off">
+                        </div>
+                    </div>
+                `;
+                peopleContainer.appendChild(card);
+
+                const removeBtn = card.querySelector('.btn-remove');
+                removeBtn.addEventListener('click', function() {
+                    removePersonCard(id);
+                });
+
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function removePersonCard(id) {
+                const card = document.getElementById(`person-card-${id}`);
+                if (card) {
+                    card.remove();
+                    updatePersonNumbers();
+                }
+            }
+
+            function updatePersonNumbers() {
+                const cards = peopleContainer.querySelectorAll('.person-card');
+                cards.forEach((card, index) => {
+                    const numSpan = card.querySelector('.person-number');
+                    if (numSpan) {
+                        numSpan.textContent = `Person ${index + 1}`;
+                    }
+                    const removeBtn = card.querySelector('.btn-remove');
+                    if (removeBtn) {
+                        removeBtn.setAttribute('data-person-id', index + 1);
+                    }
+                    const nameInput = card.querySelector('.person-name-input');
+                    const prevInput = card.querySelector('.person-prev-input');
+                    const currInput = card.querySelector('.person-curr-input');
+                    const newIdx = index + 1;
+                    if (nameInput) {
+                        nameInput.id = `person-name-${newIdx}`;
+                        nameInput.setAttribute('data-person-id', newIdx);
+                    }
+                    if (prevInput) {
+                        prevInput.id = `person-prev-${newIdx}`;
+                        prevInput.setAttribute('data-person-id', newIdx);
+                    }
+                    if (currInput) {
+                        currInput.id = `person-curr-${newIdx}`;
+                        currInput.setAttribute('data-person-id', newIdx);
+                    }
+                    const labels = card.querySelectorAll('label');
+                    labels.forEach(label => {
+                        const forAttr = label.getAttribute('for');
+                        if (forAttr && forAttr.includes('person-')) {
+                            const suffix = forAttr.split('-').pop();
+                            label.setAttribute('for', `person-${suffix}-${newIdx}`);
+                        }
+                    });
+                });
+                personCounter = cards.length;
+            }
+
+            function getPeopleData() {
+                const cards = peopleContainer.querySelectorAll('.person-card');
+                const people = [];
+                cards.forEach((card, index) => {
+                    const nameInput = card.querySelector('.person-name-input') || card.querySelector('input[type="text"]');
+                    const prevInput = card.querySelector('.person-prev-input') || card.querySelectorAll('input[type="number"]')[0];
+                    const currInput = card.querySelector('.person-curr-input') || card.querySelectorAll('input[type="number"]')[1];
+                    const name = nameInput ? nameInput.value.trim() : '';
+                    const prevVal = prevInput ? prevInput.value : '';
+                    const currVal = currInput ? currInput.value : '';
+                    people.push({
+                        index: index + 1,
+                        name: name,
+                        prevStr: prevVal,
+                        currStr: currVal,
+                        prev: prevVal === '' ? NaN : parseFloat(prevVal),
+                        curr: currVal === '' ? NaN : parseFloat(currVal)
+                    });
+                });
+                return people;
+            }
+
+            // ============ VALIDATION ============
+            function validateInputs() {
+                const errors = [];
+                const billingMonth = billingMonthInput.value.trim();
+                const mainMeterUnitsStr = mainMeterUnitsInput.value.trim();
+                const totalBillStr = totalBillInput.value.trim();
+                const calcDate = calcDateInput.value;
+
+                if (!billingMonth) {
+                    errors.push('Billing Month is required.');
+                }
+
+                if (!calcDate) {
+                    errors.push('Calculation Date is required.');
+                }
+
+                if (!mainMeterUnitsStr) {
+                    errors.push('Main Meter Units is required.');
+                } else {
+                    const val = parseFloat(mainMeterUnitsStr);
+                    if (isNaN(val) || val <= 0) {
+                        errors.push('Main Meter Units must be a positive number greater than 0.');
+                    }
+                }
+
+                if (!totalBillStr) {
+                    errors.push('Total Electricity Bill is required.');
+                } else {
+                    const val = parseFloat(totalBillStr);
+                    if (isNaN(val) || val < 0) {
+                        errors.push('Total Electricity Bill must be a non-negative number.');
+                    }
+                }
+
+                const people = getPeopleData();
+                if (people.length === 0) {
+                    errors.push('At least one person must be added.');
+                }
+
+                people.forEach((person, idx) => {
+                    if (!person.name) {
+                        errors.push(`Person ${idx + 1}: Name is required.`);
+                    }
+                    if (isNaN(person.prev) || person.prev < 0) {
+                        errors.push(`Person ${idx + 1}: Previous Reading must be a non-negative number.`);
+                    }
+                    if (isNaN(person.curr) || person.curr < 0) {
+                        errors.push(`Person ${idx + 1}: Current Reading must be a non-negative number.`);
+                    }
+                    if (!isNaN(person.prev) && !isNaN(person.curr) && person.curr < person.prev) {
+                        errors.push(`Person ${idx + 1}: Current Reading cannot be less than Previous Reading.`);
+                    }
+                });
+
+                return errors;
+            }
+
+            // ============ CALCULATION ENGINE ============
+            function calculateBill() {
+                const billingMonth = billingMonthInput.value.trim();
+                const mainMeterUnits = parseFloat(mainMeterUnitsInput.value);
+                const totalBill = parseFloat(totalBillInput.value);
+                const calcDate = calcDateInput.value;
+                const calcTime = getCurrentTimeString();
+
+                const peopleData = getPeopleData();
+                const people = peopleData.map((p, idx) => {
+                    const actualUnits = p.curr - p.prev;
+                    return {
+                        index: idx + 1,
+                        name: p.name,
+                        previousReading: p.prev,
+                        currentReading: p.curr,
+                        actualUnits: actualUnits,
+                        adjustment: 0,
+                        finalUnits: 0,
+                        rawBill: 0,
+                        finalBill: 0,
+                        displayBill: '0.00'
+                    };
+                });
+
+                const submeterTotal = people.reduce((sum, p) => sum + p.actualUnits, 0);
+                const difference = submeterTotal - mainMeterUnits;
+                const adjustmentPerPerson = people.length > 0 ? difference / people.length : 0;
+
+                people.forEach(p => {
+                    p.adjustment = adjustmentPerPerson;
+                    p.finalUnits = p.actualUnits - adjustmentPerPerson;
+                });
+
+                const finalUnitsTotal = people.reduce((sum, p) => sum + p.finalUnits, 0);
+
+                // FULL-PRECISION per unit cost
+                const perUnitCostInternal = totalBill / mainMeterUnits;
+
+                // Raw bills (full precision)
+                people.forEach(p => {
+                    p.rawBill = p.finalUnits * perUnitCostInternal;
+                });
+
+                // ===== CURRENCY RECONCILIATION (Largest Remainder Method) =====
+                const totalBillPaisa = Math.round(totalBill * 100);
+                const peopleWithRaws = people.map(p => {
+                    const rawPaisa = p.rawBill * 100;
+                    const basePaisa = Math.floor(rawPaisa + 1e-9);
+                    const remainder = rawPaisa - basePaisa;
+                    return {
+                        ...p,
+                        basePaisa: basePaisa,
+                        remainder: remainder
+                    };
+                });
+
+                const sumBasePaisa = peopleWithRaws.reduce((sum, p) => sum + p.basePaisa, 0);
+                let residualPaisa = totalBillPaisa - sumBasePaisa;
+
+                const sortedIndices = peopleWithRaws.map((p, i) => ({ idx: i, remainder: p.remainder }));
+                sortedIndices.sort((a, b) => b.remainder - a.remainder);
+
+                let residualCounter = 0;
+                while (residualPaisa > 0 && residualCounter < sortedIndices.length) {
+                    const targetIdx = sortedIndices[residualCounter].idx;
+                    peopleWithRaws[targetIdx].basePaisa += 1;
+                    residualPaisa -= 1;
+                    residualCounter++;
+                }
+
+                if (residualPaisa > 0) {
+                    peopleWithRaws[0].basePaisa += residualPaisa;
+                    residualPaisa = 0;
+                }
+
+                peopleWithRaws.forEach(p => {
+                    p.finalBill = p.basePaisa / 100;
+                    p.displayBill = formatCurrency(p.finalBill);
+                });
+
+                const finalTotalBill = peopleWithRaws.reduce((sum, p) => sum + p.finalBill, 0);
+                const finalTotalPaisa = Math.round(finalTotalBill * 100);
+                const reconciliationDiff = Math.abs(finalTotalPaisa - totalBillPaisa);
+
+                // ===== VALIDATION =====
+                const validationErrors = [];
+                const finalUnitsSum = peopleWithRaws.reduce((sum, p) => sum + p.finalUnits, 0);
+                const tolerance = 1e-8;
+
+                if (Math.abs(finalUnitsSum - mainMeterUnits) > tolerance) {
+                    validationErrors.push(`Final units total (${formatUnits(finalUnitsSum)}) does not match Main Meter Units (${formatUnits(mainMeterUnits)})`);
+                }
+
+                if (reconciliationDiff !== 0) {
+                    validationErrors.push(`Final bills total (${formatCurrency(finalTotalBill)}) does not match Original Total Bill (${formatCurrency(totalBill)})`);
+                }
+
+                const validationPassed = validationErrors.length === 0;
+
+                const result = {
+                    billingMonth: billingMonth,
+                    calculationDate: formatDisplayDate(calcDate),
+                    calculationDateRaw: calcDate,
+                    calculationTime: calcTime,
+                    mainMeterUnits: mainMeterUnits,
+                    totalBill: totalBill,
+                    perUnitCostInternal: perUnitCostInternal,
+                    perUnitCostDisplay: formatFullPrecision(perUnitCostInternal), // exact full precision string
+                    submeterTotal: submeterTotal,
+                    difference: difference,
+                    adjustmentPerPerson: adjustmentPerPerson,
+                    finalUnitsTotal: finalUnitsTotal,
+                    people: peopleWithRaws.map(p => ({
+                        index: p.index,
+                        name: p.name,
+                        previousReading: p.previousReading,
+                        currentReading: p.currentReading,
+                        actualUnits: p.actualUnits,
+                        adjustment: p.adjustment,
+                        finalUnits: p.finalUnits,
+                        rawBill: p.rawBill,
+                        finalBill: p.finalBill,
+                        displayBill: p.displayBill
+                    })),
+                    finalTotalBill: finalTotalBill,
+                    displayFinalTotal: formatCurrency(finalTotalBill),
+                    validationPassed: validationPassed,
+                    validationErrors: validationErrors,
+                    printDate: '',
+                    printTime: ''
+                };
+
+                return result;
+            }
+
+            // ============ DISPLAY RESULTS ============
+            function displayResult(result) {
+                finalResultObject = result;
+
+                resultTitle.textContent = `${result.billingMonth} — Electricity Bill Summary`;
+
+                resultMeta.innerHTML = `
+                    <span>Calculation Date: ${result.calculationDate}</span>
+                    <span>Time: ${result.calculationTime}</span>
+                `;
+
+                // Summary grid
+                resultSummary.innerHTML = `
+                    <div class="summary-item">
+                        <div class="summary-label">Main Meter Units</div>
+                        <div class="summary-value">${formatUnits(result.mainMeterUnits)}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Bill</div>
+                        <div class="summary-value">${result.displayFinalTotal} PKR</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Per Unit Cost</div>
+                        <div class="summary-value">${result.perUnitCostDisplay}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Submeter Total</div>
+                        <div class="summary-value">${formatUnits(result.submeterTotal)}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Difference</div>
+                        <div class="summary-value">${formatUnits(result.difference)}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Adj./Person</div>
+                        <div class="summary-value">${formatUnits(result.adjustmentPerPerson)}</div>
+                    </div>
+                    <div class="summary-item" style="grid-column: span 2;">
+                        <div class="summary-label">Final Units Total</div>
+                        <div class="summary-value highlight">${formatUnits(result.finalUnitsTotal)}</div>
+                    </div>
+                `;
+
+                let tableHTML = '';
+                result.people.forEach(p => {
+                    tableHTML += `
+                        <tr>
+                            <td class="person-name" data-label="Person">${p.name || 'Person ' + p.index}</td>
+                            <td data-label="Prev Reading">${formatUnits(p.previousReading)}</td>
+                            <td data-label="Curr Reading">${formatUnits(p.currentReading)}</td>
+                            <td data-label="Actual Units">${formatUnits(p.actualUnits)}</td>
+                            <td data-label="Adjustment">-${formatUnits(p.adjustment)}</td>
+                            <td data-label="Final Units">${formatUnits(p.finalUnits)}</td>
+                            <td class="amount" data-label="Bill Amount">${p.displayBill} PKR</td>
+                        </tr>
+                    `;
+                });
+                peopleResultsBody.innerHTML = tableHTML;
+
+                finalTotalDisplay.textContent = `${result.displayFinalTotal} PKR`;
+
+                let detailsHTML = `
+                    <div class="detail-row">
+                        <span class="detail-label">Main Meter Units</span>
+                        <span class="detail-value">${formatUnits(result.mainMeterUnits)}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Total Bill</span>
+                        <span class="detail-value">${result.displayFinalTotal} PKR</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Per Unit Cost (Exact)</span>
+                        <span class="detail-value full-precision">${result.perUnitCostDisplay}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Submeter Total</span>
+                        <span class="detail-value">${formatUnits(result.submeterTotal)} Units</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Difference</span>
+                        <span class="detail-value">${formatUnits(result.difference)} Units</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Adjustment Per Person</span>
+                        <span class="detail-value">${formatUnits(result.adjustmentPerPerson)} Units</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Final Units Total</span>
+                        <span class="detail-value">${formatUnits(result.finalUnitsTotal)} Units</span>
+                    </div>
+                `;
+
+                result.people.forEach(p => {
+                    detailsHTML += `
+                        <div class="detail-row">
+                            <span class="detail-label">${p.name || 'Person ' + p.index} — Raw Bill</span>
+                            <span class="detail-value full-precision">${p.rawBill}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${p.name || 'Person ' + p.index} — Final Bill</span>
+                            <span class="detail-value">${p.displayBill} PKR</span>
+                        </div>
+                    `;
+                });
+
+                detailsHTML += `
+                    <div class="detail-row">
+                        <span class="detail-label">Final Total</span>
+                        <span class="detail-value">${result.displayFinalTotal} PKR</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Validation</span>
+                        <span class="detail-value" style="font-weight:700;">${result.validationPassed ? 'PASSED ✓' : 'FAILED'}</span>
+                    </div>
+                `;
+                detailsGrid.innerHTML = detailsHTML;
+
+                resultSection.classList.remove('hidden');
+                detailsSection.classList.add('hidden');
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                errorContainer.classList.add('hidden');
+            }
+
+            // ============ COPY RESULT ============
+            function generateCopyText(result) {
+                let text = `${result.billingMonth} — Electricity Bill Summary\n`;
+                text += `──────────────────────────────\n\n`;
+                text += `Main Meter Units: ${formatUnits(result.mainMeterUnits)}\n`;
+                text += `Total Bill: ${result.displayFinalTotal} PKR\n`;
+                text += `Per Unit Cost: ${result.perUnitCostDisplay}\n\n`;
+                text += `Submeter Total: ${formatUnits(result.submeterTotal)} Units\n`;
+                text += `Difference: ${formatUnits(result.difference)} Units\n`;
+                text += `Adjustment Per Person: ${formatUnits(result.adjustmentPerPerson)} Units\n\n`;
+                text += `──────────────────────────────\n\n`;
+
+                result.people.forEach((p, idx) => {
+                    text += `${idx + 1}. ${p.name || 'Person ' + p.index}\n`;
+                    text += `   Previous Reading: ${formatUnits(p.previousReading)}\n`;
+                    text += `   Current Reading: ${formatUnits(p.currentReading)}\n`;
+                    text += `   Actual Units: ${formatUnits(p.actualUnits)}\n`;
+                    text += `   Adjustment Units: -${formatUnits(p.adjustment)}\n`;
+                    text += `   Final Units: ${formatUnits(p.finalUnits)}\n`;
+                    text += `   Bill Amount: ${p.displayBill} PKR\n\n`;
+                });
+
+                text += `──────────────────────────────\n`;
+                text += `Total Bill: ${result.displayFinalTotal} PKR\n`;
+                text += `Calculation Date: ${result.calculationDate} ${result.calculationTime}\n`;
+                return text;
+            }
+
+            async function copyResult() {
+                if (!finalResultObject) {
+                    showToast('No result to copy');
+                    return;
+                }
+                const text = generateCopyText(finalResultObject);
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        textarea.style.pointerEvents = 'none';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    }
+                    showToast('Result Copied');
+                } catch (err) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    textarea.style.pointerEvents = 'none';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast('Result Copied');
+                    } catch (e) {
+                        showToast('Copy failed — please copy manually');
+                    }
+                    document.body.removeChild(textarea);
+                }
+            }
+
+            // ============ PRINT ============
+            function printResult() {
+                if (!finalResultObject) {
+                    showToast('No result to print');
+                    return;
+                }
+
+                finalResultObject.printDate = formatDisplayDate(getTodayDateString());
+                finalResultObject.printTime = getCurrentTimeString();
+
+                resultMeta.innerHTML = `
+                    <span>Calculation Date: ${finalResultObject.calculationDate}</span>
+                    <span>Time: ${finalResultObject.calculationTime}</span>
+                    <span>Print Date: ${finalResultObject.printDate}</span>
+                    <span>Print Time: ${finalResultObject.printTime}</span>
+                `;
+
+                window.print();
+            }
+
+            // ============ EVENT LISTENERS ============
+            addPersonBtn.addEventListener('click', function() {
+                addPersonCard('', '', '');
+            });
+
+            calculateBtn.addEventListener('click', function() {
+                const errors = validateInputs();
+                if (errors.length > 0) {
+                    errorList.innerHTML = errors.map(e => `<li>${e}</li>`).join('');
+                    errorContainer.classList.remove('hidden');
+                    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    resultSection.classList.add('hidden');
+                    finalResultObject = null;
+                    return;
+                }
+                errorContainer.classList.add('hidden');
+                const result = calculateBill();
+                if (!result.validationPassed) {
+                    errorList.innerHTML = `<li>Calculation Error: ${result.validationErrors.join('; ')}</li>`;
+                    errorContainer.classList.remove('hidden');
+                    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    resultSection.classList.add('hidden');
+                    return;
+                }
+                displayResult(result);
+            });
+
+            detailsBtn.addEventListener('click', function() {
+                if (!finalResultObject) return;
+                detailsSection.classList.toggle('hidden');
+                if (!detailsSection.classList.contains('hidden')) {
+                    detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            copyBtn.addEventListener('click', copyResult);
+
+            printBtn.addEventListener('click', printResult);
+
+            // ============ INITIALIZATION ============
+            function init() {
+                calcDateInput.value = getTodayDateString();
+                addPersonCard('', '', '');
+                addPersonCard('', '', '');
+                personCounter = 2;
+            }
+
+            init();
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                    e.preventDefault();
+                    const inputs = Array.from(document.querySelectorAll('input:not([type="date"])'));
+                    const currentIdx = inputs.indexOf(e.target);
+                    if (currentIdx >= 0 && currentIdx < inputs.length - 1) {
+                        inputs[currentIdx + 1].focus();
+                    } else {
+                        calculateBtn.click();
+                    }
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
